@@ -1,5 +1,14 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 
-mongoose.connect('mongodb://127.0.0.1:27017/playground')
-    .then(() => console.log('数据库连接成功'))
-    .catch(() => console.log('数据库连接失败'));
+dotenv.config();
+
+mongoose.connect(process.env.MONGO_URL);
+const db=mongoose.connection;
+db.on('error',err=>{
+    console.error(`MongoDB error: ${err.message}`);
+    process.exit(1);
+})
+db.once('open',()=>{
+    console.log('MongoDB connection established');
+})

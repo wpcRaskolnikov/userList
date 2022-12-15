@@ -1,78 +1,25 @@
-import http from 'node:http';
-import url from 'node:url';
-import querystring from "node:querystring";
-import mongoose from "mongoose";
+import express from 'express';
+import cors from "cors";
+import {deleteUser, getAllUsers, login, register} from "./controllers/controller.js";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 import './connection.js';
 
-const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        minlength: 1,
-        maxlength: 20
-    },
-    age: {
-        type: Number,
-        min: 0,
-        max: 120
-    },
-    password: String,
-    email: String,
-    hobbies: [String]
+const port = process.env.PORT || 3000;
+
+const app = express();
+
+app.use(express.urlencoded({extended: true}))
+app.use(express.json());
+app.use(cors());
+
+app.get("/api/list", getAllUsers);
+app.delete("/api/delete/:id",deleteUser);
+app.post("/api/register", register);
+app.post("/api/login", login);
+
+app.listen(port, () => {
+    console.log(`Server started on ${port}`)
 });
-
-const User = mongoose.model('User', userSchema);
-
-http.createServer(async (request, response) => {
-    const method = request.method;
-    const {pathname, query} = url.parse(request.url, true);
-
-    if (method === 'GET') {
-        response.writeHead(200, {
-            'Content-type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        });
-        if (pathname === '/list') {
-            let users = await User.find();
-            response.end(JSON.stringify(users));
-        } else if (pathname === '/remove') {
-            await User.findOneAndDelete({_id: query.id});
-            response.end("Delete success");
-        }else if(pathname==='/modify'){
-            let user = await User.findOne({ _id: query.id });
-            response.end(JSON.stringify(user));
-        }
-    } else if (method === 'POST') {
-        if (pathname === '/add') {
-            let formData = '';
-            request.on('data', param => {
-                formData += param;
-            })
-            request.on('end', async () => {
-                let user = querystring.parse(formData)
-                await User.create(user);
-                response.writeHead(301, {
-                    Location: 'http://localhost:3000'
-                });
-                response.end();
-            })
-
-        } else if (pathname === '/modify') {
-            let formData = '';
-            request.on('data', param => {
-                formData += param;
-            })
-            request.on('end', async () => {
-                let user = querystring.parse(formData)
-                await User.updateOne({_id: query.id}, user);
-                response.writeHead(301, {
-                    Location: 'http://localhost:3000'
-                });
-                response.end();
-            })
-        }
-    }
-
-}).listen(8080);
-
-console.log("Server running at http://127.0.0.1:8080");
