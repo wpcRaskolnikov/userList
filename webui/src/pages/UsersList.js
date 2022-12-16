@@ -1,10 +1,8 @@
 import {Link} from "react-router-dom";
 import {useState} from "react";
 import {allUsersRoute, deleteRoute} from "../utile/ApiRouters";
-import {useNavigate} from "react-router-dom";
 
 function UsersList() {
-    const navigate=useNavigate();
     const [users, setUsers] = useState([]);
     fetch(allUsersRoute)
         .then(res => res.json())

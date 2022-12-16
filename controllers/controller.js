@@ -1,5 +1,4 @@
 import User from "../userModel.js"
-import url from 'node:url';
 
 export const register = async (req, res, next) => {
     try {
@@ -19,13 +18,15 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
     try {
         const {username, password} = req.body;
+
         const user = await User.findOne({username});
         if (!user)
             return res.json({msg: "Incorrect Username or Password", status: false});
+        const isPasswordValid=(password===user.password);
         if (!isPasswordValid)
             return res.json({msg: "Incorrect Username or Password", status: false});
-        delete user.password;
-        return res.json({status: true, user});
+        req.session.username = username;
+        return res.json({status: true, username});
     } catch (ex) {
         next(ex);
     }
