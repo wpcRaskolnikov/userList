@@ -18,22 +18,23 @@ function UsersList() {
                 <tr>
                     <th>用户名</th>
                     <th>密码</th>
+                    <th>电子邮箱</th>
                     <th>操作</th>
                 </tr>
                 </thead>
                 <tbody>
                 {
-                    users.map(({username, password}, i) => (
+                    users.map(({username, password,email}, i) => (
                         <tr key={i}>
                             <td>{username}</td>
                             <td>{password}</td>
+                            <td>{email}</td>
                             <td>
                                 <button onClick={() => {
                                     fetch(`${deleteRoute}/${username}`, {method: 'delete'})
                                         .then(res => res.json())
                                         .catch(err=>console.log(err)
-                                )
-                                    ;
+                                );
                                 }} className="btn btn-danger btn-xs">删除
                                 </button>
                             </td>
